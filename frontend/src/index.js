@@ -1,18 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
+import './styles.css'
+import imagemCapa from './img_dieta_01.jpg'
 
 const Cabecalho = () => {
   return (
-    <nav className="navbar bg-body-tertiary">
-      <div className="container-fluid d-flex justify-content-center align-items-center">
-        <a className="navbar-brand" href="#" style={{ fontSize: '2rem' }}>
-          <i class="fa-solid fa-bowl-food"></i>
-          &nbsp;Dieta Automática
-        </a>
-      </div>
-    </nav>
+    <header>
+        <div className="header-content">
+            <h1>Gerador de Dieta com IA</h1>
+            <p>Crie sua dieta personalizada com a ajuda da inteligência artificial.</p>
+        </div>
+    </header>
   )
 }
 
@@ -23,30 +22,73 @@ const FormPrincipal = () => {
   }
 
   return (
-    <div className='container' style={{ marginTop: 30 }}>
-      <h3 className='text-center'>Formulário para Geração de Dieta</h3>
-      <form onSubmit={subirAlert}>
-        <div className="mb-3">
-          <label htmlFor="exampleFormControlTextarea1" className="form-label">Liste os alimentos que você comprou para a semana (se possível, com quantidades, peso)</label>
-          <textarea className="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+    <div className="container">
+        <section className="intro">
+            <img src={imagemCapa} alt="Comida saudável" className="intro-image" />
+            <p>Preencha o formulário abaixo para obter uma dieta personalizada baseada em suas necessidades e preferências. Nossa IA irá criar um plano de dieta ideal para você.</p>
+        </section>
+
+        <form id="dietForm" onSubmit={subirAlert}>
+            <div className="form-group">
+                <label htmlFor="age">Idade:</label>
+                <input type="number" id="age" name="age" required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="gender">Gênero:</label>
+                <select id="gender" name="gender" required>
+                    <option value="male">Masculino</option>
+                    <option value="female">Feminino</option>
+                    <option value="other">Outro</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label htmlFor="activityLevel">Nível de Atividade:</label>
+                <select id="activityLevel" name="activityLevel" required>
+                    <option value="sedentary">Sedentário</option>
+                    <option value="light">Leve</option>
+                    <option value="moderate">Moderado</option>
+                    <option value="active">Ativo</option>
+                    <option value="very_active">Muito Ativo</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label htmlFor="goal">Objetivo:</label>
+                <select id="goal" name="goal" required>
+                    <option value="lose_weight">Perder Peso</option>
+                    <option value="maintain_weight">Manter Peso</option>
+                    <option value="gain_weight">Ganhar Peso</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label htmlFor="ingredients">Ingredientes:</label>
+                <textarea id="ingredients" name="ingredients" rows="4" placeholder="Liste os ingredientes desejados para a dieta..." required></textarea>
+            </div>
+            <div className="form-group">
+                <button type="submit">Gerar Dieta</button>
+            </div>
+        </form>
+
+        <div className="results" id="results">
+            <h2>Resultado da Dieta</h2>
+            <p>Após preencher o formulário e clicar em "Gerar Dieta", a dieta personalizada aparecerá aqui.</p>
         </div>
-        <div className="mb-3">
-          <label htmlFor="exampleFormControlTextarea2" className="form-label">Liste alimentos que você não gosta, é alérgico, possui restrição, etc.</label>
-          <textarea className="form-control" id="exampleFormControlTextarea2" rows="3"></textarea>
+
+        <div className="diet-history" id="dietHistory">
+            <h2>Histórico de Dietas</h2>
+            <ul id="historyList">
+            </ul>
         </div>
-        <label className='form-label'>Selecione o seu objetivo</label>
-        <select class="form-select" aria-label="Default select example">
-          <option selected>Escolher</option>
-          <option value="1">Emagrecimento/Défcit Calórico</option>
-          <option value="2">Ganho de Massa Muscular</option>
-          <option value="3">Energia (para competições de corrida, maratonas, etc.)</option>
-          <option value="4">Aumento da Imunidade</option>
-        </select> 
-        <div className="col-12 mt-3">
-          <button class="btn btn-primary" type="submit">Gerar Dieta</button>
-        </div>
-      </form>
     </div>
+  )
+}
+
+const Rodape = () => {
+  return (
+    <footer>
+      <div className="footer-content">
+          <p>&copy; 2024 Montador de Dieta com IA. Todos os direitos reservados.</p>
+      </div>
+    </footer>
   )
 }
 
@@ -55,6 +97,7 @@ const App = () => {
     <div>
       <Cabecalho />
       <FormPrincipal />
+      <Rodape />
     </div>
   )
 }
