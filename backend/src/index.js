@@ -1,13 +1,13 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const mysql = require('mysql');
+const mysql = require('mysql2')
+const { GoogleGenerativeAI } = require('@google/generative-ai')
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
-  user: process.env.DB_ROOT,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD
 });
 
 connection.connect((err) => {
@@ -24,8 +24,9 @@ connection.connect((err) => {
       const tabelaLogs = `
         CREATE TABLE IF NOT EXISTS logs (
           id INT AUTO_INCREMENT PRIMARY KEY,
+          prompt VARCHAR(2000) NOT NULL,
           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          message VARCHAR(1000) NOT NULL
+          response VARCHAR(2000) NOT NULL
         )
       `;
       connection.query(tabelaLogs, (err, result) => {
@@ -44,26 +45,34 @@ app.get('/hello-world', (req, res) => {
   res.json({msg: 'Hello, world!'})
 })
 
-app.get('/consultar', (req, res) => {
+app.post('/consultar', async (req, res) => {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash'
+  })
+  const { prompt } = req.body
+  const result = await model.generateContent(prompt)
+
   const connection = mysql.createConnection({
     host: process.env.DB_HOST,
-    user: process.env.DB_ROOT,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
   });
   connection.connect((err) => {
     if (err) throw err;
     console.log('Conectado ao banco de dados!');
-    const query = "INSERT INTO logs (timestamp, message) VALUES (NOW(), 'Teste da Entrega 06')"
-    connection.query("USE log_database", (err, result) => {
+    const query = `INSERT INTO logs (prompt, timestamp, response) VALUES ("${prompt}", NOW(), "${result.response.text()}")`
+    connection.query("USE log_database", (err, queryResult) => {
       if (err) throw err;
     })
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, queryResult) => {
       if (err) throw err;
       console.log('Execução registrada nos logs com sucesso!');
     })
     connection.end();
   })
+  res.json({resposta: result.response.text()})
 })
 
 app.listen(3000, () => {
