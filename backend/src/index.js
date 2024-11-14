@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const mysql = require('mysql2')
 const { GoogleGenerativeAI } = require('@google/generative-ai')
@@ -27,7 +28,7 @@ connection.connect((err) => {
           id INT AUTO_INCREMENT PRIMARY KEY,
           prompt VARCHAR(2000) NOT NULL,
           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          response VARCHAR(2000) NOT NULL
+          response VARCHAR(5000) NOT NULL
         )
       `;
       connection.query(tabelaLogs, (err, result) => {
@@ -39,8 +40,9 @@ connection.connect((err) => {
   });
 });
 
-// Middleware
+// Middlewares
 app.use(express.json())
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.get('/hello-world', (req, res) => {
   res.json({msg: 'Hello, world!'})

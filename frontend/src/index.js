@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import './styles.css'
 import imagemCapa from './img_dieta_01.jpg'
+import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 
 const Cabecalho = () => {
   return (
@@ -16,10 +18,30 @@ const Cabecalho = () => {
 }
 
 const FormPrincipal = () => {
-  const subirAlert = (event) => {
-    event.preventDefault()
-    alert("Enviado!")
-  }
+  const [dietResult, setDietResult] = useState("Após preencher o formulário e clicar em 'Gerar Dieta', a dieta personalizada aparecerá aqui.");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const idade = event.target.age.value
+    const genero = event.target.gender.value
+    const nivelDeAtividade = event.target.activityLevel.value
+    const objetivo = event.target.goal.value
+    const ingredientes = event.target.ingredients.value
+
+    try {
+      const response = await axios.post('http://localhost:3001/consultar', {
+        prompt: `Gere uma dieta de uma semana para uma pessoa do gênero ${genero}, que tem ${idade} anos de idade, possui um nivel de atividade ${nivelDeAtividade} e tem o objetivo de ${objetivo}, os ingredientes que essa pessoa tem disponivel para usar em sua semana são: ${ingredientes}. Me responda com um código em markdown. No final, sempre inclua o seguinte aviso: "Lembre-se: Esta é apenas uma sugestão de dieta. É importante consultar um nutricionista para um plano alimentar personalizado.", onde apenas o "Lembre-se" ficará em negrito.`
+      });
+
+      if (response.status === 200) {
+        setDietResult(response.data.resposta || 'Dieta personalizada gerada com sucesso!');
+      } else {
+        setDietResult('Erro ao gerar a dieta. Tente novamente mais tarde.');
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      setDietResult('Erro ao gerar a dieta. Verifique sua conexão e tente novamente.');
+    }
+  };
 
   return (
     <div className="container">
@@ -28,7 +50,7 @@ const FormPrincipal = () => {
             <p>Preencha o formulário abaixo para obter uma dieta personalizada baseada em suas necessidades e preferências. Nossa IA irá criar um plano de dieta ideal para você.</p>
         </section>
 
-        <form id="dietForm" onSubmit={subirAlert}>
+        <form id="dietForm" onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor="age">Idade:</label>
                 <input type="number" id="age" name="age" required />
@@ -54,9 +76,9 @@ const FormPrincipal = () => {
             <div className="form-group">
                 <label htmlFor="goal">Objetivo:</label>
                 <select id="goal" name="goal" required>
-                    <option value="lose_weight">Perder Peso</option>
-                    <option value="maintain_weight">Manter Peso</option>
-                    <option value="gain_weight">Ganhar Peso</option>
+                    <option value="lose_weight">Perder peso</option>
+                    <option value="maintain_weight">Manter o peso</option>
+                    <option value="gain_weight">Ganhar massa mascular</option>
                 </select>
             </div>
             <div className="form-group">
@@ -70,14 +92,9 @@ const FormPrincipal = () => {
 
         <div className="results" id="results">
             <h2>Resultado da Dieta</h2>
-            <p>Após preencher o formulário e clicar em "Gerar Dieta", a dieta personalizada aparecerá aqui.</p>
+            <ReactMarkdown>{dietResult}</ReactMarkdown>
         </div>
 
-        <div className="diet-history" id="dietHistory">
-            <h2>Histórico de Dietas</h2>
-            <ul id="historyList">
-            </ul>
-        </div>
     </div>
   )
 }
