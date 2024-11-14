@@ -7,6 +7,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai')
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
+  port: process.env.DB_PORT,
   password: process.env.DB_PASSWORD
 });
 
@@ -57,16 +58,17 @@ app.post('/consultar', async (req, res) => {
   const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
+    port: process.env.DB_PORT,
     password: process.env.DB_PASSWORD
   });
   connection.connect((err) => {
     if (err) throw err;
     console.log('Conectado ao banco de dados!');
-    const query = `INSERT INTO logs (prompt, timestamp, response) VALUES ("${prompt}", NOW(), "${result.response.text()}")`
+    const query = `INSERT INTO logs (prompt, timestamp, response) VALUES (?, NOW(), ?)`
     connection.query("USE log_database", (err, queryResult) => {
       if (err) throw err;
     })
-    connection.query(query, (err, queryResult) => {
+    connection.query(query, [prompt, result.response.text()], (err, queryResult) => {
       if (err) throw err;
       console.log('Execução registrada nos logs com sucesso!');
     })
@@ -75,6 +77,6 @@ app.post('/consultar', async (req, res) => {
   res.json({resposta: result.response.text()})
 })
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log('Aplicação subiu')
 })
